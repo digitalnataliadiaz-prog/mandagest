@@ -135,7 +135,8 @@ tr:hover td{background:var(--bgs)}
   <div class="brand">Manda<b>Gest</b> <span style="font-size:10px;color:var(--ts)">Pro</span></div>
   <button class="nb on" onclick="goTo('dash')">Inicio</button>
   <button class="nb" onclick="goTo('noticias')">Noticias</button>
-  <button class="nb" onclick="goTo('directorio')">Directorio</button>
+  <button class="nb" onclick="goTo('publico')">Directorio</button>
+  <button class="nb" onclick="goTo('directorio')">Mi Red</button>
   <button class="nb" onclick="goTo('turnos')">Turnos</button>
   <button class="nb" onclick="goTo('calendario')">Calendario</button>
   <button class="nb" onclick="goTo('aranceles')">Aranceles</button>
@@ -150,30 +151,42 @@ tr:hover td{background:var(--bgs)}
 <div id="pg-login" class="pg on">
   <div class="login-wrap">
     <div class="login-card">
-      <div style="text-align:center;margin-bottom:22px">
+      <div style="text-align:center;margin-bottom:18px">
         <div style="font-size:28px;font-weight:700;color:var(--ac)">MandaGest</div>
         <div style="font-size:11px;color:var(--ts)">Sistema de gestión para mandatarios del automotor</div>
       </div>
-      <label>Nombre y apellido</label>
-      <input id="l-nombre" placeholder="Ej: Juan García">
-      <label>Email</label>
-      <input id="l-email" type="email" placeholder="correo@ejemplo.com">
-      <label>Matrícula</label>
-      <input id="l-matricula" placeholder="Ej: BA-4521">
-      <label>Provincia</label>
-      <select id="l-prov">
-        <option>Buenos Aires</option><option>CABA</option><option>Córdoba</option><option>Santa Fe</option>
-        <option>Mendoza</option><option>Tucumán</option><option>Salta</option><option>Entre Ríos</option>
-        <option>Misiones</option><option>Corrientes</option><option>Chaco</option><option>Jujuy</option>
-        <option>Río Negro</option><option>Neuquén</option><option>San Juan</option><option>La Pampa</option>
-        <option>Chubut</option><option>Otro</option>
-      </select>
-      <label>Teléfono / WhatsApp</label>
-      <input id="l-tel" placeholder="11 1234-5678">
-      <div style="margin-top:14px">
-        <button class="btn btn-p" style="width:100%;padding:10px;font-size:14px" onclick="doLogin()">Ingresar al sistema</button>
+      <div style="display:flex;gap:0;margin-bottom:16px;border:1px solid var(--brd);border-radius:var(--rad);overflow:hidden">
+        <button id="tab-login" onclick="switchTab('login')" style="flex:1;padding:8px;border:none;background:var(--ac);color:#fff;cursor:pointer;font-size:13px;font-weight:500">Ingresar</button>
+        <button id="tab-reg" onclick="switchTab('reg')" style="flex:1;padding:8px;border:none;background:transparent;color:var(--ts);cursor:pointer;font-size:13px">Registrarse</button>
       </div>
-      <div style="margin-top:8px;font-size:10px;color:var(--ts);text-align:center">Los datos se guardan localmente en tu dispositivo</div>
+      <div id="form-login">
+        <label>Email</label>
+        <input id="l-email" type="email" placeholder="correo@ejemplo.com">
+        <label>Contrasena</label>
+        <input id="l-pass" type="password" placeholder="Tu contrasena">
+        <div style="margin-top:14px">
+          <button class="btn btn-p" style="width:100%;padding:10px;font-size:14px" onclick="doLogin()">Ingresar</button>
+        </div>
+      </div>
+      <div id="form-reg" style="display:none">
+        <label>Nombre y apellido</label>
+        <input id="r-nombre" placeholder="Garcia, Juan">
+        <label>Email</label>
+        <input id="r-email" type="email" placeholder="correo@ejemplo.com">
+        <label>Matricula DNRPA *</label>
+        <input id="r-matricula" placeholder="Ej: BA-4521 (obligatorio)">
+        <label>Provincia</label>
+        <select id="r-prov"><option>Buenos Aires</option><option>CABA</option><option>Cordoba</option><option>Santa Fe</option><option>Mendoza</option><option>Tucuman</option><option>Salta</option><option>Entre Rios</option><option>Misiones</option><option>Corrientes</option><option>Chaco</option><option>Jujuy</option><option>Rio Negro</option><option>Neuquen</option><option>San Juan</option><option>La Pampa</option><option>Chubut</option><option>Otro</option></select>
+        <label>Telefono / WhatsApp</label>
+        <input id="r-tel" placeholder="11 1234-5678">
+        <label>Contrasena</label>
+        <input id="r-pass" type="password" placeholder="Minimo 6 caracteres">
+        <div style="margin-top:14px">
+          <button class="btn btn-p" style="width:100%;padding:10px;font-size:14px" onclick="doRegistro()">Solicitar acceso</button>
+        </div>
+        <div style="margin-top:8px;font-size:10px;color:var(--ts);text-align:center">Tu solicitud sera revisada por la administradora antes de activarse</div>
+      </div>
+      <div id="login-status" style="margin-top:10px;font-size:12px;color:var(--ac);text-align:center"></div>
     </div>
   </div>
 </div>
@@ -238,6 +251,39 @@ tr:hover td{background:var(--bgs)}
   </div>
 </div>
 
+<!-- ADMIN PANEL -->
+<div id="pg-admin" class="pg">
+  <div class="card" style="margin-top:14px">
+    <div class="card-title" style="color:var(--err)">🔐 Panel de administración — Natalia Diaz</div>
+    <div class="g2">
+      <div class="met"><div class="met-l">Solicitudes pendientes</div><div class="met-v" id="admin-pend">0</div></div>
+      <div class="met"><div class="met-l">Usuarios activos</div><div class="met-v" id="admin-activos">0</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title" style="justify-content:space-between">
+      Solicitudes de acceso pendientes
+      <button class="btn btn-sm" onclick="fetchAdmin()">↻ Actualizar</button>
+    </div>
+    <div id="admin-solicitudes"><p style="font-size:12px;color:var(--ts)">Cargando...</p></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Usuarios registrados</div>
+    <div id="admin-usuarios"><p style="font-size:12px;color:var(--ts)">Cargando...</p></div>
+  </div>
+</div>
+
+<!-- DIRECTORIO PUBLICO -->
+<div id="pg-publico" class="pg">
+  <div class="card" style="margin-top:14px">
+    <div class="card-title">🌐 Directorio público de mandatarios verificados</div>
+    <div class="row" style="margin-bottom:10px">
+      <input id="pub-search" placeholder="Buscar por nombre, provincia, especialidad..." oninput="fetchPublico()">
+    </div>
+    <div id="lista-publico"><div class="pulse" style="font-size:12px;color:var(--ts);padding:8px">Cargando...</div></div>
+  </div>
+</div>
+
 <!-- DIRECTORIO -->
 <div id="pg-directorio" class="pg">
   <div class="card" style="margin-top:14px">
@@ -293,7 +339,7 @@ tr:hover td{background:var(--bgs)}
       <div><label>Cliente</label><input id="nt-cli"></div>
       <div><label>DNI / CUIL</label><input id="nt-dni"></div>
       <div><label>Dominio</label><input id="nt-dom" placeholder="ABC123"></div>
-       <div><label>Mandatario</label><input id="nt-mand"></div>
+      <div><label>Mandatario</label><input id="nt-mand"></div>
     </div>
     <label>Observaciones</label><textarea id="nt-obs" rows="2"></textarea>
     <div style="display:flex;gap:8px;margin-top:10px">
@@ -571,24 +617,58 @@ let noticiasFiltro='todos';
 let dirEdit=null;
 
 // NOTICIAS
+// SISTEMA DE NOTICIAS CON GOOGLE NEWS RSS — NOTICIAS REALES
+const RSS_FEEDS=[
+  {query:'DNRPA registro automotor argentina',fuente:'DNRPA',url:'https://www.dnrpa.gov.ar'},
+  {query:'ARBA patentes automotor buenos aires',fuente:'ARBA',url:'https://www.arba.gov.ar'},
+  {query:'AGIP patentes CABA automotor',fuente:'AGIP',url:'https://www.agip.gob.ar'},
+  {query:'registro automotor transferencia argentina 2026',fuente:'Automotor',url:'https://www.dnrpa.gov.ar'},
+  {query:'APROA mandatarios automotor argentina',fuente:'APROA',url:'https://www.aproa.org.ar'},
+  {query:'patentes autos argentina rentas provinciales',fuente:'Rentas',url:'https://www.argentina.gob.ar'},
+];
+const RSS_PROXY='https://api.rss2json.com/v1/api.json?rss_url=';
+
 async function loadNoticias(force=false){
-  const cached=load('noticias_cache',null);
-  const ts=load('noticias_ts',0);
-  if(!force&&cached&&(Date.now()-ts)<1800000){noticiasCache=cached;renderNoticias();renderDashNews();return;}
-  document.getElementById('news-container').innerHTML='<div style="text-align:center;padding:30px;color:var(--ts);font-size:13px" class="pulse">Consultando fuentes del sector automotor argentino...</div>';
+  const cached=JSON.parse(localStorage.getItem('mg_news')||'null');
+  const ts=parseInt(localStorage.getItem('mg_news_ts')||'0');
+  if(!force&&cached&&(Date.now()-ts)<3600000){noticiasCache=cached;renderNoticias();renderDashNews();return;}
+  const cont=document.getElementById('news-container');
+  cont.innerHTML='<div style="text-align:center;padding:30px;color:var(--ts)" class="pulse">Cargando noticias reales del sector...</div>';
   try{
-    const res=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
-      model:'claude-sonnet-4-20250514',max_tokens:1000,
-      messages:[{role:'user',content:`Generá un listado de 10 noticias ficticias pero muy realistas y detalladas sobre el sector automotor argentino, con foco en: DNRPA disposiciones y actualizaciones normativas, APROA novedades y circulares, AGA noticias gremiales, ACARA mercado automotor, actualizaciones de aranceles, normativa del Ministerio de Justicia. Usá fechas del año 2025-2026. Hacé las noticias técnicas y útiles para mandatarios del automotor. Respondé SOLO con un array JSON válido sin texto extra ni backticks. Formato: [{"titulo":"...","fuente":"DNRPA","fecha":"DD/MM/YYYY","resumen":"2-3 oraciones técnicas específicas","tags":["tag1","tag2"],"url":"https://www.dnrpa.gov.ar"}]`}]
-    })});
-    const data=await res.json();
-    const txt=data.content[0].text.trim().replace(/```json|```/g,'').trim();
-    const noticias=JSON.parse(txt);
-    noticiasCache=noticias;save('noticias_cache',noticias);save('noticias_ts',Date.now());
-    renderNoticias();renderDashNews();
+    const todasNoticias=[];
+    const promises=RSS_FEEDS.map(async feed=>{
+      const rssUrl=`https://news.google.com/rss/search?q=${encodeURIComponent(feed.query)}&hl=es-419&gl=AR&ceid=AR:es-419`;
+      const apiUrl=`${RSS_PROXY}${encodeURIComponent(rssUrl)}&count=4`;
+      const res=await fetch(apiUrl);
+      const data=await res.json();
+      if(data.status==='ok'&&data.items){
+        data.items.forEach(item=>{
+          todasNoticias.push({
+            titulo:item.title.replace(/ - .+$/,'').trim(),
+            fuente:feed.fuente,
+            fecha:new Date(item.pubDate).toLocaleDateString('es-AR'),
+            resumen:item.description?item.description.replace(/<[^>]*>/g,'').slice(0,200)+'...':item.title,
+            tags:[feed.fuente.toLowerCase(),'automotor'],
+            url:item.link||feed.url,
+            pubDate:new Date(item.pubDate).getTime()
+          });
+        });
+      }
+    });
+    await Promise.allSettled(promises);
+    // Sort by date, most recent first, remove duplicates
+    const seen=new Set();
+    noticiasCache=todasNoticias
+      .filter(n=>{if(seen.has(n.titulo))return false;seen.add(n.titulo);return true;})
+      .sort((a,b)=>b.pubDate-a.pubDate)
+      .slice(0,30);
+    if(!noticiasCache.length)throw new Error('No news');
+    localStorage.setItem('mg_news',JSON.stringify(noticiasCache));
+    localStorage.setItem('mg_news_ts',Date.now().toString());
   }catch(e){
-    noticiasCache=getNoticiasFallback();renderNoticias();renderDashNews();
- }
+    noticiasCache=getNoticiasFallback();
+  }
+  renderNoticias();renderDashNews();
 }
 
 function getNoticiasFallback(){return[
@@ -643,26 +723,191 @@ function fmtFecha(f){if(!f)return'';const[y,m,d]=f.split('-');const ms=['','Ene'
 function fmtPeso(n){return'$'+Math.round(n).toLocaleString('es-AR')}
 
 // AUTH
+const ADMIN_EMAIL='digitalnataliadiaz@gmail.com';
+
+// Simple hash for password (not cryptographic but sufficient for this use case)
+async function hashPass(pass){
+  const encoder=new TextEncoder();
+  const data=encoder.encode(pass+'mg_salt_2026');
+  const buf=await crypto.subtle.digest('SHA-256',data);
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+function switchTab(tab){
+  document.getElementById('form-login').style.display=tab==='login'?'block':'none';
+  document.getElementById('form-reg').style.display=tab==='reg'?'block':'none';
+  document.getElementById('tab-login').style.background=tab==='login'?'var(--ac)':'transparent';
+  document.getElementById('tab-login').style.color=tab==='login'?'#fff':'var(--ts)';
+  document.getElementById('tab-reg').style.background=tab==='reg'?'var(--ac)':'transparent';
+  document.getElementById('tab-reg').style.color=tab==='reg'?'#fff':'var(--ts)';
+  document.getElementById('login-status').textContent='';
+}
+
+function setLoginStatus(msg,ok=true){
+  const el=document.getElementById('login-status');
+  el.textContent=msg;el.style.color=ok?'var(--ok)':'var(--err)';
+}
+
 function init(){if(user)showApp();else showLogin();}
-function showLogin(){document.getElementById('main-nav').style.display='none';document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));document.getElementById('pg-login').classList.add('on');}
+function showLogin(){
+  document.getElementById('main-nav').style.display='none';
+  document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
+  document.getElementById('pg-login').classList.add('on');
+}
 function showApp(){
   document.getElementById('main-nav').style.display='flex';
   document.getElementById('pg-login').classList.remove('on');
-  const n=user.nombre||'';
-  const parts=n.trim().split(/[\s,]+/).filter(Boolean);
+  const parts=(user.nombre||'').trim().split(/[\s,]+/).filter(Boolean);
   const ini=((parts[0]||'')[0]+(parts[1]||'')[0]).toUpperCase();
   document.getElementById('nav-avatar').textContent=ini||'U';
+  // Show admin button if admin
+  if(user.es_admin){
+    const existing=document.getElementById('nav-admin');
+    if(!existing){
+      const btn=document.createElement('button');
+      btn.id='nav-admin';btn.className='nb';
+      btn.textContent='Admin';btn.style.color='var(--err)';
+      btn.onclick=()=>goTo('admin');
+      document.querySelector('.nav').insertBefore(btn,document.getElementById('nav-avatar'));
+    }
+  }
   goTo('dash');
 }
-function doLogin(){
-  const n=document.getElementById('l-nombre').value.trim();
-  const e=document.getElementById('l-email').value.trim();
-  const m=document.getElementById('l-matricula').value.trim();
-  if(!n||!e||!m){alert('Completá nombre, email y matrícula');return;}
-  user={nombre:n,email:e,matricula:m,prov:document.getElementById('l-prov').value,tel:document.getElementById('l-tel').value,registro:'',cuit:'',dir:'',logo:null};
-  save('user',user);showApp();
+
+async function doLogin(){
+  const e=document.getElementById('l-email').value.trim().toLowerCase();
+  const p=document.getElementById('l-pass').value;
+  if(!e||!p){setLoginStatus('Completá email y contraseña',false);return;}
+  setLoginStatus('Verificando...');
+  const hash=await hashPass(p);
+  // Check if admin
+  if(e===ADMIN_EMAIL){
+    const{data:u}=await sb.from('usuarios').select('*').eq('email',e).single();
+    if(u){
+      if(u.password_hash&&u.password_hash!==hash){setLoginStatus('Contraseña incorrecta',false);return;}
+      // Save hash if first login
+      if(!u.password_hash){await sb.from('usuarios').update({password_hash:hash,aprobado:true,es_admin:true}).eq('email',e);}
+      user={...u,password_hash:undefined,es_admin:true,aprobado:true};
+      localStorage.setItem('mg_user',JSON.stringify(user));
+      showApp();return;
+    } else {
+      // Create admin user
+      const newUser={id:e.replace(/[^a-z0-9]/g,'_'),nombre:'Natalia Diaz',email:e,matricula:'ADMIN',prov:'Buenos Aires',tel:'',registro:'',cuit:'',dir:'',logo:null,password_hash:hash,aprobado:true,es_admin:true};
+      await sb.from('usuarios').insert([newUser]);
+      user={...newUser};localStorage.setItem('mg_user',JSON.stringify(user));
+      showApp();return;
+    }
+  }
+  // Regular user
+  const{data:u}=await sb.from('usuarios').select('*').eq('email',e).single();
+  if(!u){setLoginStatus('Email no registrado. Usá la pestaña Registrarse.',false);return;}
+  if(!u.aprobado){setLoginStatus('Tu cuenta está pendiente de aprobación por la administradora.',false);return;}
+  if(u.password_hash!==hash){setLoginStatus('Contraseña incorrecta',false);return;}
+  user={...u,password_hash:undefined};
+  localStorage.setItem('mg_user',JSON.stringify(user));
+  showApp();
 }
-function logout(){if(confirm('¿Cerrar sesión?')){user=null;save('user',null);showLogin();}}
+
+async function doRegistro(){
+  const nombre=document.getElementById('r-nombre').value.trim();
+  const email=document.getElementById('r-email').value.trim().toLowerCase();
+  const matricula=document.getElementById('r-matricula').value.trim();
+  const pass=document.getElementById('r-pass').value;
+  if(!nombre||!email||!matricula||!pass){setLoginStatus('Completá todos los campos',false);return;}
+  if(pass.length<6){setLoginStatus('La contraseña debe tener al menos 6 caracteres',false);return;}
+  if(!matricula){setLoginStatus('La matrícula DNRPA es obligatoria',false);return;}
+  setLoginStatus('Enviando solicitud...');
+  const hash=await hashPass(pass);
+  // Check if already exists
+  const{data:ex}=await sb.from('solicitudes').select('id,estado').eq('email',email).single();
+  if(ex){
+    if(ex.estado==='pendiente')setLoginStatus('Ya tenés una solicitud pendiente. Esperá la aprobación.',false);
+    else setLoginStatus('Tu solicitud fue rechazada. Contactá a la administradora.',false);
+    return;
+  }
+  const{data:exU}=await sb.from('usuarios').select('id').eq('email',email).single();
+  if(exU){setLoginStatus('Este email ya está registrado. Iniciá sesión.',false);return;}
+  await sb.from('solicitudes').insert([{nombre,email,matricula,prov:document.getElementById('r-prov').value,tel:document.getElementById('r-tel').value,password_hash:hash,estado:'pendiente'}]);
+  setLoginStatus('Solicitud enviada. La administradora revisará tu matrícula y te activará el acceso.');
+}
+
+function logout(){if(confirm('Cerrar sesion?')){user=null;localStorage.removeItem('mg_user');showLogin();}}
+
+// ADMIN FUNCTIONS
+async function fetchAdmin(){
+  if(!user||!user.es_admin)return;
+  const{data:sols}=await sb.from('solicitudes').select('*').order('created_at',{ascending:false});
+  const{count:activos}=await sb.from('usuarios').select('*',{count:'exact',head:true}).eq('aprobado',true);
+  const pend=(sols||[]).filter(s=>s.estado==='pendiente');
+  document.getElementById('admin-pend').textContent=pend.length;
+  document.getElementById('admin-activos').textContent=activos||0;
+  const contSol=document.getElementById('admin-solicitudes');
+  if(!pend.length){contSol.innerHTML='<p style="font-size:12px;color:var(--ts)">Sin solicitudes pendientes.</p>';}
+  else{contSol.innerHTML=pend.map(s=>`
+    <div style="background:var(--bgs);border:1px solid var(--brd);border-radius:var(--rad);padding:12px;margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px">
+        <div>
+          <div style="font-size:14px;font-weight:500">${s.nombre}</div>
+          <div style="font-size:12px;color:var(--ts)">${s.email} · Mat: <strong>${s.matricula}</strong> · ${s.prov}</div>
+          <div style="font-size:11px;color:var(--ts)">${s.tel||''}</div>
+        </div>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-ok btn-sm" onclick="aprobarSolicitud(${s.id},'${s.email}','${s.nombre}','${s.matricula}','${s.prov}','${s.tel||''}','${s.password_hash}')">✓ Aprobar</button>
+          <button class="btn btn-err btn-sm" onclick="rechazarSolicitud(${s.id})">✗ Rechazar</button>
+        </div>
+      </div>
+    </div>`).join('');}
+  // Users list
+  const{data:users}=await sb.from('usuarios').select('*').order('nombre');
+  const contU=document.getElementById('admin-usuarios');
+  contU.innerHTML=(users||[]).map(u=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--brd);font-size:12px">
+      <div><strong>${u.nombre}</strong> · ${u.email} · Mat: ${u.matricula||'-'}</div>
+      <div style="display:flex;gap:5px;align-items:center">
+        <span class="badge ${u.aprobado?'b-green':'b-amber'}">${u.aprobado?'Activo':'Pendiente'}</span>
+        ${u.es_admin?'<span class="badge b-red">Admin</span>':''}
+        ${!u.es_admin?`<button class="btn btn-xs btn-err" onclick="desactivarUser('${u.id}')">Desactivar</button>`:''}
+      </div>
+    </div>`).join('');
+}
+
+async function aprobarSolicitud(id,email,nombre,matricula,prov,tel,hash){
+  const uid=email.replace(/[^a-z0-9]/g,'_');
+  await sb.from('usuarios').insert([{id:uid,nombre,email,matricula,prov,tel,registro:'',cuit:'',dir:'',logo:null,password_hash:hash,aprobado:true,es_admin:false}]);
+  await sb.from('solicitudes').update({estado:'aprobado'}).eq('id',id);
+  toast('Usuario aprobado: '+nombre);
+  fetchAdmin();
+}
+async function rechazarSolicitud(id){
+  if(!confirm('Rechazar esta solicitud?'))return;
+  await sb.from('solicitudes').update({estado:'rechazado'}).eq('id',id);
+  toast('Solicitud rechazada');fetchAdmin();
+}
+async function desactivarUser(id){
+  if(!confirm('Desactivar este usuario?'))return;
+  await sb.from('usuarios').update({aprobado:false}).eq('id',id);
+  toast('Usuario desactivado');fetchAdmin();
+}
+
+// DIRECTORIO PUBLICO
+async function fetchPublico(){
+  const q=(document.getElementById('pub-search').value||'').toLowerCase();
+  const{data}=await sb.from('usuarios').select('nombre,matricula,prov,tel,email,registro,esp').eq('aprobado',true).order('nombre');
+  let list=(data||[]).filter(u=>u.matricula&&u.matricula!=='ADMIN');
+  if(q)list=list.filter(u=>(u.nombre+u.prov+u.matricula+(u.esp||'')).toLowerCase().includes(q));
+  const cont=document.getElementById('lista-publico');
+  if(!list.length){cont.innerHTML='<p style="font-size:12px;color:var(--ts)">Sin mandatarios verificados aun.</p>';return;}
+  cont.innerHTML=`<div class="g2">${list.map(u=>`
+    <div style="background:var(--bgs);border:1px solid var(--brd);border-radius:var(--radl);padding:14px">
+      <div style="font-size:14px;font-weight:500;margin-bottom:4px">${u.nombre}</div>
+      <div style="font-size:11px;color:var(--ts);margin-bottom:6px">${u.prov}${u.registro?' · '+u.registro:''}</div>
+      <span class="badge b-blue" style="margin-bottom:8px;display:inline-block">Mat. ${u.matricula}</span>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">
+        ${u.tel?`<a href="https://wa.me/549${u.tel.replace(/\D/g,'')}" target="_blank" class="btn btn-sm btn-ok" style="text-decoration:none;font-size:11px">WhatsApp</a>`:''}
+        ${u.email?`<a href="mailto:${u.email}" class="btn btn-sm" style="text-decoration:none;font-size:11px">Email</a>`:''}
+      </div>
+    </div>`).join('')}</div>`;
+}
 
 function goTo(pg){
   document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
@@ -796,14 +1041,43 @@ function renderSlots(){
 function togSlot(s,on){if(on){if(!slotsAct.includes(s))slotsAct.push(s)}else{slotsAct=slotsAct.filter(x=>x!==s)}save('slotsAct',slotsAct);}
 
 // ARANCELES
-const arD={transf:{p:0.03,b:0,sp:0.015,l:'Transferencia: 3% + sellado 1.5%'},prenda:{p:0.02,b:0,sp:0.01,l:'Prenda: 2% + sellado 1%'},canc:{p:0.008,b:15000,sp:0.005,l:'Cancelación: 0.8% + base $15.000'},alta:{p:0,b:45000,sp:0.01,l:'Alta: fijo $45.000 + sellado 1%'},baja:{p:0,b:20000,sp:0,l:'Baja: fijo $20.000'},rad:{p:0.012,b:10000,sp:0.008,l:'Radicación: 1.2% + base $10.000'},expo:{p:0.025,b:0,sp:0.02,l:'Exportación: 2.5% + sellado 2%'},dup:{p:0,b:25000,sp:0,l:'Duplicado: fijo $25.000'}};
+// ARANCELES DNRPA 2026 — Fuente: Resolución MJyDDHH N°314/2002 y Disposición 947/2025
+// Arancel transferencia: 1% unificado (reforma 2025). Sellado varía por provincia.
+const SELLOS_PROV={
+  'Buenos Aires':0.03,'CABA':0.025,'Córdoba':0.02,'Santa Fe':0.02,
+  'Mendoza':0.015,'Tucumán':0.015,'Salta':0.015,'Entre Ríos':0.015,
+  'Misiones':0.015,'Corrientes':0.015,'Chaco':0.015,'Jujuy':0.015,
+  'Río Negro':0.015,'Neuquén':0.015,'San Juan':0.005,'La Pampa':0.015,
+  'Chubut':0.02,'Otro':0.015
+};
+const arD={
+  transf:{p:0.01,b:0,sp:0,l:'Transferencia: arancel DNRPA 1% (Disp.947/2025) + sellado provincial según jurisdicción'},
+  prenda:{p:0.01,b:0,sp:0,l:'Constitución de prenda: 1% sobre monto + sellado provincial'},
+  canc:{p:0.005,b:18000,sp:0,l:'Cancelación de prenda: 0.5% + base fija. Verificar arancel vigente en registro.'},
+  alta:{p:0.01,b:50000,sp:0,l:'Alta vehículo 0km: arancel fijo + 1% sobre valuación. Cédula y título sin costo desde 2025.'},
+  baja:{p:0,b:22000,sp:0,l:'Baja de dominio: arancel fijo. Verificar valor actualizado en registro seccional.'},
+  rad:{p:0.01,b:12000,sp:0,l:'Radicación: 1% sobre valuación + base fija + sellado provincial destino'},
+  expo:{p:0.02,b:0,sp:0,l:'Exportación: 2% sobre valuación + sellado + documentación adicional'},
+  dup:{p:0,b:28000,sp:0,l:'Duplicado de título: arancel fijo. Sin costo de emisión desde reforma 2025.'}
+};
 function calcAr(){
-  const tr=document.getElementById('ar-tram').value;const val=parseFloat(document.getElementById('ar-val').value)||0;const hon=parseFloat(document.getElementById('ar-hon').value)||0;const d=arD[tr];
-  const ar=Math.round(d.b+val*d.p);const ho=Math.round(ar*0.4+hon);const se=Math.round(val*d.sp);const tot=ar+ho+se;
+  const tr=document.getElementById('ar-tram').value;
+  const val=parseFloat(document.getElementById('ar-val').value)||0;
+  const hon=parseFloat(document.getElementById('ar-hon').value)||0;
+  const prov=document.getElementById('ar-prov').value;
+  const d=arD[tr];
+  const sprov=SELLOS_PROV[prov]||0.015;
+  const ar=Math.round(d.b+val*d.p);
+  const se=Math.round(val*sprov);
+  const ho=Math.round(ar*0.35+hon);
+  const tot=ar+se+ho;
   arCache={tramite:document.getElementById('ar-tram').options[document.getElementById('ar-tram').selectedIndex].text,arancel:ar,honorarios:ho,sellado:se,total:tot};
   document.getElementById('ar-res').style.display='block';
-  document.getElementById('ar-ar').textContent=fmtPeso(ar);document.getElementById('ar-ho').textContent=fmtPeso(ho);document.getElementById('ar-se').textContent=fmtPeso(se);document.getElementById('ar-tot').textContent=fmtPeso(tot);
-  document.getElementById('ar-det').textContent=d.l+'. Honorarios estimados al 40% del arancel + adicional. Orientativo.';
+  document.getElementById('ar-ar').textContent=fmtPeso(ar);
+  document.getElementById('ar-ho').textContent=fmtPeso(ho);
+  document.getElementById('ar-se').textContent=fmtPeso(se)+' ('+Math.round(sprov*100)+'% — '+prov+')';
+  document.getElementById('ar-tot').textContent=fmtPeso(tot);
+  document.getElementById('ar-det').textContent=d.l+' · Sellado '+prov+': '+(sprov*100)+'% · Honorarios orientativos al 35% del arancel. Fuente: Disp.DNRPA 947/2025 vigente desde 02/01/2026.';
 }
 function pasarARemito(){
   goTo('remitos');
