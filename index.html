@@ -1,4 +1,594 @@
-  }
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MandaGest Pro — Sistema de gestión para mandatarios</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ac:#1a56db;--ac2:#1141b0;--acl:#e8f0fe;
+  --bg:#f3f4f6;--bgp:#ffffff;--bgs:#f9fafb;
+  --tp:#111827;--ts:#6b7280;
+  --brd:#e5e7eb;--brds:#d1d5db;
+  --rad:8px;--radl:12px;
+  --ok:#16a34a;--warn:#d97706;--err:#dc2626;
+}
+@media(prefers-color-scheme:dark){
+  :root{--bg:#111827;--bgp:#1f2937;--bgs:#111827;--tp:#f9fafb;--ts:#9ca3af;--brd:#374151;--brds:#4b5563}
+}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);min-height:100vh;font-size:14px;color:var(--tp)}
+.nav{background:var(--bgp);border-bottom:1px solid var(--brd);height:50px;display:flex;align-items:center;padding:0 12px;gap:4px;position:sticky;top:0;z-index:200;overflow-x:auto;scrollbar-width:none}
+.nav::-webkit-scrollbar{display:none}
+.brand{font-size:15px;font-weight:600;color:var(--tp);white-space:nowrap;margin-right:8px;flex-shrink:0}
+.brand b{color:var(--ac)}
+.nb{padding:5px 10px;border-radius:var(--rad);border:none;background:transparent;cursor:pointer;font-size:12px;white-space:nowrap;color:var(--ts);transition:all .15s;flex-shrink:0}
+.nb:hover,.nb.on{background:var(--acl);color:var(--ac)}
+.nb.on{font-weight:500}
+.avatar{width:28px;height:28px;border-radius:50%;background:var(--ac);display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:600;cursor:pointer;flex-shrink:0;margin-left:auto}
+.pg{display:none;padding:14px;max-width:960px;margin:0 auto}
+.pg.on{display:block}
+.card{background:var(--bgp);border:1px solid var(--brd);border-radius:var(--radl);padding:16px 18px;margin-bottom:14px}
+.card-title{font-size:14px;font-weight:500;color:var(--tp);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.g2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+.g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.g4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.met{background:var(--bgs);border-radius:var(--rad);padding:10px 14px;border:1px solid var(--brd)}
+.met-l{font-size:11px;color:var(--ts);margin-bottom:3px}
+.met-v{font-size:20px;font-weight:500;color:var(--tp)}
+label{font-size:12px;color:var(--ts);display:block;margin-bottom:3px;margin-top:8px}
+label:first-child{margin-top:0}
+input,select,textarea{width:100%;padding:7px 10px;border:1px solid var(--brds);border-radius:var(--rad);font-size:13px;background:var(--bgp);color:var(--tp);font-family:inherit}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--ac);box-shadow:0 0 0 3px rgba(26,86,219,.1)}
+textarea{resize:vertical;min-height:60px}
+.btn{padding:7px 14px;border-radius:var(--rad);border:1px solid var(--brds);background:transparent;cursor:pointer;font-size:12px;color:var(--tp);font-weight:500;transition:all .15s;font-family:inherit}
+.btn:hover{background:var(--bgs)}
+.btn-p{background:var(--ac);color:#fff;border-color:var(--ac)}
+.btn-p:hover{background:var(--ac2)}
+.btn-err{background:var(--err);color:#fff;border-color:var(--err)}
+.btn-sm{padding:4px 9px;font-size:11px}
+.btn-xs{padding:3px 7px;font-size:10px}
+.row{display:flex;gap:8px;align-items:flex-end}
+.row>*{flex:1}
+.sep{height:1px;background:var(--brd);margin:12px 0}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:500}
+.b-blue{background:#e8f0fe;color:#1141b0}
+.b-green{background:#dcfce7;color:#15803d}
+.b-red{background:#fee2e2;color:#b91c1c}
+.b-amber{background:#fef3c7;color:#92400e}
+.b-gray{background:var(--bgs);color:var(--ts);border:1px solid var(--brd)}
+.b-purple{background:#ede9fe;color:#5b21b6}
+.tbl-w{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:left;padding:7px 10px;border-bottom:1px solid var(--brd);color:var(--ts);font-weight:500;white-space:nowrap}
+td{padding:7px 10px;border-bottom:1px solid var(--brd);color:var(--tp);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--bgs)}
+.ts-row{background:var(--bgs);border:1px solid var(--brd);border-radius:var(--rad);padding:9px 12px;margin-bottom:7px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.ts-row.libre{border-left:3px solid var(--ok)}
+.ts-row.reservado{border-left:3px solid var(--warn)}
+.ts-row.ocupado{border-left:3px solid var(--err)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}
+.cal-day{min-height:44px;padding:5px;border-radius:var(--rad);border:1px solid var(--brd);background:var(--bgs);cursor:pointer;transition:all .15s;font-size:12px}
+.cal-day:hover{border-color:var(--ac)}
+.cal-day.today{border-color:var(--ac);background:var(--acl)}
+.cal-day.finde{opacity:.5}
+.cal-day.empty{background:transparent;border-color:transparent;cursor:default}
+.calc-screen{background:var(--bgs);border-radius:var(--rad);padding:10px 14px;margin-bottom:10px;text-align:right;border:1px solid var(--brd)}
+.calc-expr{font-size:11px;color:var(--ts);min-height:16px}
+.calc-num{font-size:26px;font-weight:500;color:var(--tp)}
+.calc-pad{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
+.ck{padding:11px;border-radius:var(--rad);border:1px solid var(--brd);background:var(--bgs);cursor:pointer;font-size:14px;font-weight:500;color:var(--tp);transition:all .15s;text-align:center}
+.ck:hover{background:var(--brd)}
+.ck.op{color:var(--ac)}
+.ck.eq{background:var(--ac);color:#fff;border-color:var(--ac)}
+.ck.cl{color:var(--err)}
+.chat-area{height:260px;overflow-y:auto;border:1px solid var(--brd);border-radius:var(--rad);padding:10px;margin-bottom:10px;background:var(--bgs)}
+.msg{margin-bottom:10px;max-width:92%}
+.msg.user{margin-left:auto;text-align:right}
+.msg-bubble{display:inline-block;padding:7px 12px;border-radius:12px;font-size:12px;line-height:1.5}
+.msg.bot .msg-bubble{background:var(--bgp);border:1px solid var(--brd);color:var(--tp);border-radius:0 12px 12px 12px}
+.msg.user .msg-bubble{background:var(--ac);color:#fff;border-radius:12px 12px 0 12px}
+.msg-time{font-size:10px;color:var(--ts);margin-top:2px}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--ts);animation:bounce .8s infinite;display:inline-block}
+.dot:nth-child(2){animation-delay:.15s}
+.dot:nth-child(3){animation-delay:.3s}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+.remito-preview{background:#fff;color:#000;border:1px solid #ccc;border-radius:var(--rad);padding:24px 28px;font-family:'Times New Roman',serif;font-size:13px;line-height:1.5}
+.remito-preview *{color:#000}
+.rh{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #1a56db;padding-bottom:12px;margin-bottom:14px}
+.rh-right{text-align:right;font-size:11px}
+.rh-right .num{font-size:16px;font-weight:700;color:#1a56db}
+.r-section{margin-bottom:12px}
+.r-section h3{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#666;margin-bottom:4px;border-bottom:1px solid #eee;padding-bottom:3px}
+.r-items{width:100%;border-collapse:collapse;margin-bottom:8px}
+.r-items th{text-align:left;font-size:11px;font-weight:700;padding:4px 8px;background:#f0f4ff;border:1px solid #ddd}
+.r-items td{padding:4px 8px;border:1px solid #eee;font-size:12px}
+.r-total{text-align:right;font-size:16px;font-weight:700;color:#1a56db;border-top:2px solid #1a56db;padding-top:8px}
+.r-footer{font-size:10px;color:#999;text-align:center;border-top:1px solid #eee;margin-top:14px;padding-top:8px}
+.upload-zone{border:2px dashed var(--brds);border-radius:var(--rad);padding:18px;text-align:center;cursor:pointer;transition:all .15s;background:var(--bgs)}
+.upload-zone:hover{border-color:var(--ac);background:var(--acl)}
+.logo-preview{max-height:70px;max-width:180px;object-fit:contain;border-radius:var(--rad);border:1px solid var(--brd)}
+.news-card{background:var(--bgp);border:1px solid var(--brd);border-radius:var(--radl);overflow:hidden;margin-bottom:10px;transition:border-color .15s;cursor:pointer}
+.news-card:hover{border-color:var(--ac)}
+.news-header{padding:12px 14px;display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.news-source{font-size:10px;font-weight:500;padding:2px 8px;border-radius:20px;flex-shrink:0}
+.news-title{font-size:13px;font-weight:500;color:var(--tp);line-height:1.4}
+.news-date{font-size:10px;color:var(--ts);margin-top:3px}
+.news-excerpt{font-size:11px;color:var(--ts);padding:8px 14px 12px;line-height:1.5;border-top:1px solid var(--brd)}
+.news-tag{display:inline-block;padding:1px 6px;border-radius:10px;font-size:10px;margin-right:3px}
+.nf-btn{padding:5px 12px;border-radius:20px;border:1px solid var(--brd);background:transparent;cursor:pointer;font-size:11px;color:var(--ts);transition:all .15s}
+.nf-btn.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+.pulse{animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.login-wrap{min-height:calc(100vh - 50px);display:flex;align-items:center;justify-content:center;padding:16px}
+.login-card{background:var(--bgp);border:1px solid var(--brd);border-radius:var(--radl);padding:28px 24px;width:100%;max-width:340px;box-shadow:0 4px 24px rgba(0,0,0,.08)}
+.alert{padding:9px 12px;border-radius:var(--rad);font-size:12px;margin-bottom:10px}
+.alert-info{background:#e8f0fe;color:#1141b0;border:1px solid #93c5fd}
+@media print{body>*:not(#print-area){display:none!important}#print-area{display:block!important;position:static}}
+@media(max-width:600px){.g2,.g3,.g4{grid-template-columns:1fr}.g2>*,.g3>*,.g4>*{min-width:0}}
+</style>
+</head>
+<body>
+
+<div class="nav" id="main-nav" style="display:none">
+  <div class="brand">Manda<b>Gest</b> <span style="font-size:10px;color:var(--ts)">Pro</span></div>
+  <button class="nb on" onclick="goTo('dash')">Inicio</button>
+  <button class="nb" onclick="goTo('noticias')">Noticias</button>
+  <button class="nb" onclick="goTo('directorio')">Directorio</button>
+  <button class="nb" onclick="goTo('turnos')">Turnos</button>
+  <button class="nb" onclick="goTo('calendario')">Calendario</button>
+  <button class="nb" onclick="goTo('aranceles')">Aranceles</button>
+  <button class="nb" onclick="goTo('remitos')">Remitos</button>
+  <button class="nb" onclick="goTo('dnrpa')">DNRPA</button>
+  <button class="nb" onclick="goTo('calculadora')">Calc.</button>
+  <button class="nb" onclick="goTo('perfil')">Perfil</button>
+  <div class="avatar" id="nav-avatar" onclick="goTo('perfil')">?</div>
+</div>
+
+<!-- LOGIN -->
+<div id="pg-login" class="pg on">
+  <div class="login-wrap">
+    <div class="login-card">
+      <div style="text-align:center;margin-bottom:22px">
+        <div style="font-size:28px;font-weight:700;color:var(--ac)">MandaGest</div>
+        <div style="font-size:11px;color:var(--ts)">Sistema de gestión para mandatarios del automotor</div>
+      </div>
+      <label>Nombre y apellido</label>
+      <input id="l-nombre" placeholder="Ej: Juan García">
+      <label>Email</label>
+      <input id="l-email" type="email" placeholder="correo@ejemplo.com">
+      <label>Matrícula</label>
+      <input id="l-matricula" placeholder="Ej: BA-4521">
+      <label>Provincia</label>
+      <select id="l-prov">
+        <option>Buenos Aires</option><option>CABA</option><option>Córdoba</option><option>Santa Fe</option>
+        <option>Mendoza</option><option>Tucumán</option><option>Salta</option><option>Entre Ríos</option>
+        <option>Misiones</option><option>Corrientes</option><option>Chaco</option><option>Jujuy</option>
+        <option>Río Negro</option><option>Neuquén</option><option>San Juan</option><option>La Pampa</option>
+        <option>Chubut</option><option>Otro</option>
+      </select>
+      <label>Teléfono / WhatsApp</label>
+      <input id="l-tel" placeholder="11 1234-5678">
+      <div style="margin-top:14px">
+        <button class="btn btn-p" style="width:100%;padding:10px;font-size:14px" onclick="doLogin()">Ingresar al sistema</button>
+      </div>
+      <div style="margin-top:8px;font-size:10px;color:var(--ts);text-align:center">Los datos se guardan localmente en tu dispositivo</div>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="pg-dash" class="pg">
+  <div class="card" style="margin-top:14px">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div id="dash-saludo" style="font-size:18px;font-weight:500">Buen día</div>
+        <div id="dash-sub" style="font-size:11px;color:var(--ts);margin-top:2px"></div>
+      </div>
+      <div id="dash-logo-sm"></div>
+    </div>
+  </div>
+  <div class="g4">
+    <div class="met"><div class="met-l">Mandatarios</div><div class="met-v" id="d-tot">0</div></div>
+    <div class="met"><div class="met-l">Turnos hoy</div><div class="met-v" id="d-th">0</div></div>
+    <div class="met"><div class="met-l">Remitos</div><div class="met-v" id="d-rem">0</div></div>
+    <div class="met"><div class="met-l">Próximo turno</div><div class="met-v" id="d-prox" style="font-size:13px">–</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title" style="justify-content:space-between">
+      <span>📰 Últimas noticias del sector</span>
+      <button class="btn btn-sm" onclick="goTo('noticias')">Ver todas →</button>
+    </div>
+    <div id="dash-news-list"><div class="pulse" style="font-size:12px;color:var(--ts);padding:8px 0">Cargando noticias...</div></div>
+  </div>
+  <div class="g2">
+    <div class="card" style="cursor:pointer" onclick="goTo('directorio')"><div class="card-title">👥 Directorio</div><p style="font-size:12px;color:var(--ts)">Mandatarios de todo el país.</p><br><span class="badge b-blue">Ver →</span></div>
+    <div class="card" style="cursor:pointer" onclick="goTo('turnos')"><div class="card-title">📅 Turnos</div><p style="font-size:12px;color:var(--ts)">Registro Automotor por día.</p><br><span class="badge b-green">Ver →</span></div>
+    <div class="card" style="cursor:pointer" onclick="goTo('remitos')"><div class="card-title">🧾 Remitos</div><p style="font-size:12px;color:var(--ts)">Comprobantes con tu logo.</p><br><span class="badge b-amber">Ver →</span></div>
+    <div class="card" style="cursor:pointer" onclick="goTo('dnrpa')"><div class="card-title">⚖️ Consultor DNRPA</div><p style="font-size:12px;color:var(--ts)">Digesto y normativa vigente.</p><br><span class="badge b-purple">Ver →</span></div>
+  </div>
+</div>
+
+<!-- NOTICIAS -->
+<div id="pg-noticias" class="pg">
+  <div class="card" style="margin-top:14px">
+    <div class="card-title" style="justify-content:space-between">
+      <span>📰 Noticias y normativa del sector automotor</span>
+      <button class="btn btn-sm btn-p" onclick="loadNoticias(true)">↻ Actualizar</button>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px">
+      <button class="nf-btn on" onclick="setFiltro('todos',this)">Todas</button>
+      <button class="nf-btn" onclick="setFiltro('DNRPA',this)">DNRPA</button>
+      <button class="nf-btn" onclick="setFiltro('APROA',this)">APROA</button>
+      <button class="nf-btn" onclick="setFiltro('AGA',this)">AGA</button>
+      <button class="nf-btn" onclick="setFiltro('ACARA',this)">ACARA</button>
+      <button class="nf-btn" onclick="setFiltro('normativa',this)">Normativa</button>
+      <button class="nf-btn" onclick="setFiltro('aranceles',this)">Aranceles</button>
+    </div>
+    <div id="news-container"><div style="text-align:center;padding:30px;color:var(--ts);font-size:13px" class="pulse">Cargando noticias del sector...</div></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1px solid var(--brd)">
+      <a href="https://www.dnrpa.gov.ar" target="_blank" class="btn btn-sm btn-p" style="text-decoration:none">Portal DNRPA</a>
+      <a href="https://www.aproa.org.ar" target="_blank" class="btn btn-sm" style="text-decoration:none">APROA</a>
+      <a href="https://www.aga.org.ar" target="_blank" class="btn btn-sm" style="text-decoration:none">AGA</a>
+      <a href="https://www.acara.org.ar" target="_blank" class="btn btn-sm" style="text-decoration:none">ACARA</a>
+      <a href="https://www.infobae.com/autos/" target="_blank" class="btn btn-sm" style="text-decoration:none">Infobae Autos</a>
+      <a href="https://www.ambito.com/autos" target="_blank" class="btn btn-sm" style="text-decoration:none">Ámbito</a>
+    </div>
+  </div>
+</div>
+
+<!-- DIRECTORIO -->
+<div id="pg-directorio" class="pg">
+  <div class="card" style="margin-top:14px">
+    <div class="card-title">👥 Directorio de mandatarios</div>
+    <div class="row" style="margin-bottom:10px">
+      <input id="dir-search" placeholder="Buscar nombre, matrícula, provincia..." oninput="renderDir()">
+      <div style="flex:0"><button class="btn btn-p" onclick="showFormDir()">+ Agregar</button></div>
+    </div>
+    <div id="form-dir" style="display:none;background:var(--bgs);border-radius:var(--rad);padding:12px;margin-bottom:12px;border:1px solid var(--brd)">
+      <div class="g2">
+        <div><label>Apellido y nombre</label><input id="d-nombre" placeholder="García, Juan"></div>
+        <div><label>Matrícula</label><input id="d-mat" placeholder="BA-4521"></div>
+        <div><label>Provincia</label><select id="d-prov"><option>Buenos Aires</option><option>CABA</option><option>Córdoba</option><option>Santa Fe</option><option>Mendoza</option><option>Tucumán</option><option>Salta</option><option>Entre Ríos</option><option>Misiones</option><option>Corrientes</option><option>Chaco</option><option>Jujuy</option><option>Río Negro</option><option>Neuquén</option><option>San Juan</option><option>La Pampa</option><option>Chubut</option><option>Otro</option></select></div>
+        <div><label>Ciudad</label><input id="d-ciudad" placeholder="Ciudad/localidad"></div>
+        <div><label>Registro Automotor</label><input id="d-registro" placeholder="Registro N°1 La Plata"></div>
+        <div><label>Teléfono / WhatsApp</label><input id="d-tel" placeholder="11 1234-5678"></div>
+        <div><label>Email</label><input id="d-email" placeholder="correo@ejemplo.com"></div>
+        <div><label>CUIT</label><input id="d-cuit" placeholder="20-12345678-9"></div>
+        <div><label>Especialidad</label><select id="d-esp"><option>General</option><option>Transferencias</option><option>Prendas</option><option>Exportaciones</option><option>Alta de vehículos</option><option>Bajas</option><option>Radicaciones</option></select></div>
+        <div><label>Instagram / Redes</label><input id="d-ig" placeholder="@usuario"></div>
+      </div>
+      <label>Notas</label><textarea id="d-notas" rows="2"></textarea>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="btn btn-p" onclick="saveDir()">Guardar</button>
+        <button class="btn" onclick="document.getElementById('form-dir').style.display='none'">Cancelar</button>
+      </div>
+    </div>
+    <div class="tbl-w">
+      <table>
+        <thead><tr><th>Nombre</th><th>Matrícula</th><th>Registro</th><th>Provincia</th><th>Contacto</th><th>Esp.</th><th></th></tr></thead>
+        <tbody id="dir-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- TURNOS -->
+<div id="pg-turnos" class="pg">
+  <div class="card" style="margin-top:14px">
+    <div class="card-title">📅 Gestión de turnos</div>
+    <div class="row">
+      <div><label>Fecha</label><input type="date" id="t-fecha" onchange="renderTurnos()"></div>
+      <div><label>Registro</label><input id="t-reg" value="Registro N°1"></div>
+      <div style="flex:0"><button class="btn btn-p" onclick="document.getElementById('form-turno').style.display='block'">+ Nuevo</button></div>
+      <div style="flex:0"><button class="btn" onclick="exportTurnosCSV()">CSV</button></div>
+    </div>
+  </div>
+  <div id="form-turno" class="card" style="display:none">
+    <div class="card-title">Nuevo turno</div>
+    <div class="g2">
+      <div><label>Hora</label><input type="time" id="nt-hora"></div>
+      <div><label>Trámite</label><select id="nt-tram"><option>Transferencia</option><option>Alta de vehículo</option><option>Prenda</option><option>Cancelación de prenda</option><option>Exportación</option><option>Baja de dominio</option><option>Radicación</option><option>Duplicado de título</option></select></div>
+      <div><label>Cliente</label><input id="nt-cli"></div>
+      <div><label>DNI / CUIL</label><input id="nt-dni"></div>
+      <div><label>Dominio</label><input id="nt-dom" placeholder="ABC123"></div>
+       <div><label>Mandatario</label><input id="nt-mand"></div>
+    </div>
+    <label>Observaciones</label><textarea id="nt-obs" rows="2"></textarea>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="btn btn-p" onclick="saveTurno()">Confirmar</button>
+      <button class="btn" onclick="document.getElementById('form-turno').style.display='none'">Cancelar</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Turnos del día <span id="t-fecha-lbl" style="font-weight:400;color:var(--ts);font-size:12px"></span></div>
+    <div id="lista-turnos"><p style="font-size:12px;color:var(--ts)">Seleccioná una fecha.</p></div>
+  </div>
+</div>
+
+<!-- CALENDARIO -->
+<div id="pg-calendario" class="pg">
+  <div class="card" style="margin-top:14px">
+    <div class="card-title">📆 Calendario de turnos</div>
+    <div class="row" style="margin-bottom:12px">
+      <div><label>Mes</label><input type="month" id="cal-mes" onchange="renderCal()"></div>
+      <div><label>Registro</label><input id="cal-reg" value="Registro N°1"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px;margin-bottom:5px">
+      <div style="text-align:center;font-size:10px;color:var(--ts);padding:3px">Lun</div>
+      <div style="text-align:center;font-size:10px;color:var(--ts);padding:3px">Mar</div>
+      <div style="text-align:center;font-size:10px;color:var(--ts);padding:3px">Mié</div>
+      <div style="text-align:center;font-size:10px;color:var(--ts);padding:3px">Jue</div>
+      <div style="text-align:center;font-size:10px;color:var(--ts);padding:3px">Vie</div>
+      <div style="text-align:center;font-size:10px;color:var(--ts);padding:3px">Sáb</div>
+      <div style="text-align:center;font-size:10px;color:var(--ts);padding:3px">Dom</div>
+    </div>
+    <div id="cal-grid" class="cal-grid"></div>
+  </div>
+  <div id="cal-det" class="card" style="display:none">
+    <div class="card-title" id="cal-det-t">Turnos</div>
+    <div id="cal-det-l"></div>
+    <button class="btn btn-p btn-sm" style="margin-top:8px" onclick="goTo('turnos')">Gestionar →</button>
+  </div>
+  <div class="card">
+    <div class="card-title">Horarios precargados</div>
+    <p style="font-size:12px;color:var(--ts);margin-bottom:10px">Bloques habituales del Registro.</p>
+    <div id="slots-list" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+  </div>
+</div>
+
+<!-- ARANCELES -->
+<div id="pg-aranceles" class="pg">
+  <div class="card" style="margin-top:14px">
+    <div class="card-title">💰 Calculadora de honorarios y aranceles</div>
+    <div class="g2">
+      <div><label>Tipo de trámite</label>
+        <select id="ar-tram" onchange="calcAr()">
+          <option value="transf">Transferencia de dominio</option>
+          <option value="prenda">Constitución de prenda</option>
+          <option value="canc">Cancelación de prenda</option>
+          <option value="alta">Alta vehículo nuevo</option>
+          <option value="baja">Baja de dominio</option>
+          <option value="rad">Radicación</option>
+          <option value="expo">Exportación</option>
+          <option value="dup">Duplicado de título</option>
+        </select>
+      </div>
+      <div><label>Valuación fiscal / valor ($)</label><input type="number" id="ar-val" placeholder="0" oninput="calcAr()" min="0"></div>
+      <div><label>Honorarios adicionales ($)</label><input type="number" id="ar-hon" placeholder="0" oninput="calcAr()" min="0"></div>
+      <div><label>Provincia</label>
+        <select id="ar-prov" onchange="calcAr()">
+          <option>Buenos Aires</option><option>CABA</option><option>Córdoba</option><option>Santa Fe</option><option>Mendoza</option><option>Otro</option>
+        </select>
+      </div>
+    </div>
+    <div class="sep"></div>
+    <div id="ar-res" style="display:none">
+      <div class="g4">
+        <div class="met"><div class="met-l">Arancel oficial</div><div class="met-v" id="ar-ar">$0</div></div>
+        <div class="met"><div class="met-l">Honorarios</div><div class="met-v" id="ar-ho">$0</div></div>
+        <div class="met"><div class="met-l">Sellado/impuestos</div><div class="met-v" id="ar-se">$0</div></div>
+        <div class="met" style="border-color:var(--ac)"><div class="met-l">Total estimado</div><div class="met-v" id="ar-tot" style="color:var(--ac)">$0</div></div>
+      </div>
+      <div id="ar-det" style="font-size:11px;color:var(--ts);margin-top:8px"></div>
+      <div style="margin-top:10px"><button class="btn btn-p btn-sm" onclick="pasarARemito()">Crear remito con este cálculo →</button></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Referencia rápida</div>
+    <div class="tbl-w">
+      <table>
+        <thead><tr><th>Trámite</th><th>% sobre valor</th><th>Base fija</th><th>Sellado</th></tr></thead>
+        <tbody>
+          <tr><td>Transferencia</td><td>3%</td><td>–</td><td>1.5%</td></tr>
+          <tr><td>Prenda</td><td>2%</td><td>–</td><td>1%</td></tr>
+          <tr><td>Cancelación prenda</td><td>0.8%</td><td>$15.000</td><td>0.5%</td></tr>
+          <tr><td>Alta nuevo</td><td>–</td><td>$45.000</td><td>1%</td></tr>
+          <tr><td>Baja</td><td>–</td><td>$20.000</td><td>–</td></tr>
+          <tr><td>Radicación</td><td>1.2%</td><td>$10.000</td><td>0.8%</td></tr>
+          <tr><td>Exportación</td><td>2.5%</td><td>–</td><td>2%</td></tr>
+          <tr><td>Duplicado</td><td>–</td><td>$25.000</td><td>–</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="font-size:10px;color:var(--ts);margin-top:6px">* Orientativo. Verificar con el arancel vigente del Colegio/Registro correspondiente.</p>
+  </div>
+</div>
+
+<!-- REMITOS -->
+<div id="pg-remitos" class="pg">
+  <div class="g2" style="margin-top:14px">
+    <div>
+      <div class="card">
+        <div class="card-title">🧾 Datos del remito</div>
+        <label>Cliente / Destinatario</label><input id="r-cli" placeholder="Apellido y nombre">
+        <label>DNI / CUIL</label><input id="r-dni" placeholder="20-12345678-9">
+        <label>Dominio</label><input id="r-dom" placeholder="ABC123">
+        <label>Trámite</label><input id="r-tram" placeholder="Transferencia de dominio">
+        <label>Fecha</label><input type="date" id="r-fecha">
+        <label>N° Remito</label><input id="r-num" placeholder="0001">
+        <div class="sep"></div>
+        <div style="font-size:13px;font-weight:500;margin-bottom:8px">Conceptos</div>
+        <div id="r-items-list"></div>
+        <div class="g2" style="margin-bottom:8px">
+          <input id="ri-desc" placeholder="Descripción">
+          <input type="number" id="ri-monto" placeholder="Monto $">
+        </div>
+        <button class="btn btn-sm" onclick="addRItem()">+ Concepto</button>
+        <div class="sep"></div>
+        <label>Observaciones</label>
+        <textarea id="r-obs" rows="2"></textarea>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button class="btn btn-p" onclick="renderRemito()">Vista previa</button>
+          <button class="btn btn-sm" onclick="imprimirRemito()">Imprimir / PDF</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Historial de remitos</div>
+        <div id="hist-remitos" style="font-size:12px;color:var(--ts)">Sin remitos.</div>
+      </div>
+    </div>
+    <div>
+      <div id="remito-container" class="remito-preview">
+        <div style="text-align:center;color:#aaa;padding:40px 0;font-family:sans-serif;font-size:13px">La vista previa aparecerá aquí.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DNRPA -->
+<div id="pg-dnrpa" class="pg">
+  <div class="card" style="margin-top:14px">
+    <div class="card-title">⚖️ Portal DNRPA — Acceso rápido</div>
+    <div style="display:flex;flex-wrap:wrap;gap:7px">
+      <a href="https://www.dnrpa.gov.ar" target="_blank" class="btn btn-p btn-sm" style="text-decoration:none">Portal DNRPA</a>
+      <a href="https://www.dnrpa.gov.ar/portal_dnrpa/tramitesonline.php" target="_blank" class="btn btn-sm" style="text-decoration:none">Trámites online</a>
+      <a href="https://www.dnrpa.gov.ar/portal_dnrpa/digesto.php" target="_blank" class="btn btn-sm" style="text-decoration:none">Digesto jurídico</a>
+      <a href="https://www.dnrpa.gov.ar/portal_dnrpa/disposiciones.php" target="_blank" class="btn btn-sm" style="text-decoration:none">Disposiciones</a>
+      <a href="https://www.dnrpa.gov.ar/portal_dnrpa/normativa.php" target="_blank" class="btn btn-sm" style="text-decoration:none">Normativa</a>
+      <a href="https://www.dnrpa.gov.ar/portal_dnrpa/consultas.php" target="_blank" class="btn btn-sm" style="text-decoration:none">Consulta dominio</a>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Consultor inteligente del Digesto DNRPA</div>
+    <div class="alert alert-info" style="font-size:11px">IA especializada en el Digesto DNRPA y normativa automotor argentina. Consultá sobre trámites, plazos, documentación y aranceles.</div>
+    <div class="chat-area" id="chat-msgs"></div>
+    <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px">
+      <button class="btn btn-xs" onclick="preguntar('¿Qué documentos se necesitan para transferencia de dominio?')">Transferencia: docs</button>
+      <button class="btn btn-xs" onclick="preguntar('¿Cuál es el plazo para inscribir una transferencia?')">Plazos</button>
+      <button class="btn btn-xs" onclick="preguntar('¿Qué es la prenda con registro y cómo se constituye?')">Prenda</button>
+      <button class="btn btn-xs" onclick="preguntar('¿Cómo se calcula el impuesto de sellos en Buenos Aires?')">Sellos</button>
+      <button class="btn btn-xs" onclick="preguntar('¿Qué trámites se pueden hacer online en DNRPA?')">Online</button>
+      <button class="btn btn-xs" onclick="preguntar('¿Qué hacer si se pierde el título del automotor?')">Título perdido</button>
+      <button class="btn btn-xs" onclick="preguntar('¿Cuál es la normativa para exportación de vehículos?')">Exportación</button>
+      <button class="btn btn-xs" onclick="preguntar('¿Cuáles son las últimas disposiciones de la DNRPA?')">Últimas disp.</button>
+    </div>
+    <div class="row">
+      <input id="chat-input" placeholder="Escribí tu consulta sobre DNRPA, Digesto, normativa..." onkeydown="if(event.key==='Enter')enviarChat()">
+      <div style="flex:0"><button class="btn btn-p" onclick="enviarChat()">Enviar</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- CALCULADORA -->
+<div id="pg-calculadora" class="pg">
+  <div style="max-width:320px;margin:14px auto">
+    <div class="card">
+      <div class="card-title">🔢 Calculadora</div>
+      <div class="calc-screen">
+        <div class="calc-expr" id="c-expr"></div>
+        <div class="calc-num" id="c-num">0</div>
+      </div>
+      <div class="calc-pad">
+        <button class="ck cl" onclick="cAC()">AC</button>
+        <button class="ck op" onclick="cSign()">+/−</button>
+        <button class="ck op" onclick="cPct()">%</button>
+        <button class="ck op" onclick="cOp('/')">÷</button>
+        <button class="ck" onclick="cN('7')">7</button>
+        <button class="ck" onclick="cN('8')">8</button>
+        <button class="ck" onclick="cN('9')">9</button>
+        <button class="ck op" onclick="cOp('*')">×</button>
+        <button class="ck" onclick="cN('4')">4</button>
+        <button class="ck" onclick="cN('5')">5</button>
+        <button class="ck" onclick="cN('6')">6</button>
+        <button class="ck op" onclick="cOp('-')">−</button>
+        <button class="ck" onclick="cN('1')">1</button>
+        <button class="ck" onclick="cN('2')">2</button>
+        <button class="ck" onclick="cN('3')">3</button>
+        <button class="ck op" onclick="cOp('+')">+</button>
+        <button class="ck" onclick="cN('0')" style="grid-column:span 2">0</button>
+        <button class="ck" onclick="cDot()">.</button>
+        <button class="ck eq" onclick="cEq()">=</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">💱 USD → ARS</div>
+      <label>USD</label><input type="number" id="cv-usd" placeholder="0" oninput="cvt()">
+      <label>Tipo de cambio</label><input type="number" id="cv-tc" value="1350" oninput="cvt()">
+      <div id="cv-res" style="margin-top:8px;font-size:13px;color:var(--ts)"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Historial</div>
+      <div id="c-hist" style="font-size:11px;color:var(--ts);max-height:120px;overflow-y:auto"></div>
+    </div>
+  </div>
+</div>
+
+<!-- PERFIL -->
+<div id="pg-perfil" class="pg">
+  <div class="card" style="margin-top:14px">
+    <div class="card-title">👤 Mi perfil</div>
+    <div class="g2">
+      <div><label>Nombre y apellido</label><input id="p-nombre"></div>
+      <div><label>Email</label><input id="p-email" type="email"></div>
+      <div><label>Matrícula</label><input id="p-mat"></div>
+      <div><label>CUIT</label><input id="p-cuit" placeholder="20-12345678-9"></div>
+      <div><label>Provincia</label><select id="p-prov"><option>Buenos Aires</option><option>CABA</option><option>Córdoba</option><option>Santa Fe</option><option>Mendoza</option><option>Otro</option></select></div>
+      <div><label>Registro Automotor</label><input id="p-reg"></div>
+      <div><label>Teléfono</label><input id="p-tel"></div>
+      <div><label>Dirección / Estudio</label><input id="p-dir"></div>
+    </div>
+    <div class="sep"></div>
+    <div style="font-size:13px;font-weight:500;margin-bottom:8px">Logo del estudio</div>
+    <div id="logo-actual" style="margin-bottom:10px"></div>
+    <div class="upload-zone" onclick="document.getElementById('logo-input').click()">
+      <div style="font-size:13px;color:var(--ts)">Hacé click para subir tu logo</div>
+      <div style="font-size:11px;color:var(--ts)">PNG, JPG — máx. 500KB</div>
+      <input type="file" id="logo-input" accept="image/*" style="display:none" onchange="subirLogo(this)">
+    </div>
+    <div class="sep"></div>
+    <button class="btn btn-p" onclick="savePerfil()">Guardar perfil</button>
+    <button class="btn btn-err btn-sm" style="margin-left:8px" onclick="logout()">Cerrar sesión</button>
+  </div>
+</div>
+
+<div id="print-area" style="display:none"></div>
+
+<script>
+const API_KEY="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";
+const API_URL="https://small-water-298c.digitalnataliadiaz.workers.dev/";
+
+function save(k,v){try{localStorage.setItem('mg_'+k,JSON.stringify(v))}catch(e){}}
+function load(k,def){try{const v=localStorage.getItem('mg_'+k);return v?JSON.parse(v):def}catch(e){return def}}
+
+let user=load('user',null);
+let mandatarios=load('mandatarios',[
+  {id:1,nombre:'Rodríguez, María José',mat:'BA-4521',prov:'Buenos Aires',ciudad:'Buenos Aires',registro:'Registro N°5 CABA',tel:'11 4523-7890',email:'mj@mand.com',cuit:'27-12345678-9',esp:'Transferencias',ig:'',notas:''},
+  {id:2,nombre:'González, Carlos',mat:'CBA-1203',prov:'Córdoba',ciudad:'Córdoba',registro:'Registro N°2 Córdoba',tel:'351 421-5566',email:'cg@estudio.com',cuit:'20-23456789-0',esp:'General',ig:'',notas:''},
+  {id:3,nombre:'Fernández, Laura',mat:'SF-890',prov:'Santa Fe',ciudad:'Rosario',registro:'Registro N°1 Rosario',tel:'341 555-3344',email:'lf@tramites.ar',cuit:'27-34567890-1',esp:'Prendas',ig:'@lfernandez',notas:''},
+]);
+let nextDirId=load('nextDirId',4);
+let turnos=load('turnos',{});
+let remitos=load('remitos',[]);
+let nextRem=load('nextRem',1);
+let rItems=[];
+let arCache={};
+const SLOTS=['08:00','08:30','09:00','09:30','10:00','10:30','11:00','11:30','12:00','14:00','14:30','15:00','15:30','16:00'];
+let slotsAct=load('slotsAct',[...SLOTS]);
+let noticiasCache=[];
+let noticiasFiltro='todos';
+let dirEdit=null;
+
+// NOTICIAS
+async function loadNoticias(force=false){
+  const cached=load('noticias_cache',null);
+  const ts=load('noticias_ts',0);
+  if(!force&&cached&&(Date.now()-ts)<1800000){noticiasCache=cached;renderNoticias();renderDashNews();return;}
+  document.getElementById('news-container').innerHTML='<div style="text-align:center;padding:30px;color:var(--ts);font-size:13px" class="pulse">Consultando fuentes del sector automotor argentino...</div>';
+  try{
+    const res=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+      model:'claude-sonnet-4-20250514',max_tokens:1000,
+      messages:[{role:'user',content:`Generá un listado de 10 noticias ficticias pero muy realistas y detalladas sobre el sector automotor argentino, con foco en: DNRPA disposiciones y actualizaciones normativas, APROA novedades y circulares, AGA noticias gremiales, ACARA mercado automotor, actualizaciones de aranceles, normativa del Ministerio de Justicia. Usá fechas del año 2025-2026. Hacé las noticias técnicas y útiles para mandatarios del automotor. Respondé SOLO con un array JSON válido sin texto extra ni backticks. Formato: [{"titulo":"...","fuente":"DNRPA","fecha":"DD/MM/YYYY","resumen":"2-3 oraciones técnicas específicas","tags":["tag1","tag2"],"url":"https://www.dnrpa.gov.ar"}]`}]
+    })});
+    const data=await res.json();
+    const txt=data.content[0].text.trim().replace(/```json|```/g,'').trim();
+    const noticias=JSON.parse(txt);
+    noticiasCache=noticias;save('noticias_cache',noticias);save('noticias_ts',Date.now());
+    renderNoticias();renderDashNews();
+  }catch(e){
+    noticiasCache=getNoticiasFallback();renderNoticias();renderDashNews();
+ }
 }
 
 function getNoticiasFallback(){return[
@@ -265,7 +855,7 @@ async function enviarChat(){
   c.scrollTop=c.scrollHeight;
   try{
     const msgs=chatHistory.filter(m=>m.tipo!=='typing').map(m=>({role:m.tipo==='user'?'user':'assistant',content:m.texto}));
-    const res=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'application/json','x-api-key':API_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:SYS,messages:msgs})});
+    const res=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:SYS,messages:msgs})});
     const data=await res.json();
     const reply=data.content&&data.content[0]?data.content[0].text:'Sin respuesta.';
     chatHistory=chatHistory.filter(m=>m.tipo!=='typing');addMsg('bot',reply);
